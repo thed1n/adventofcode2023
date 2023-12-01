@@ -1,16 +1,8 @@
 $day = get-content .\input.txt
 
 $calibrationvalues = $day | foreach-object {
-
 [string]$numb = $_ -replace '[a-z]'
-
-if ($numb.length -eq 1) {
-    $numb = $numb*2
-}
-else {
-    $numb = $numb[0]+$numb[-1]
-}
-
+$numb = $numb[0]+$numb[-1]
 $numb -as [int]
 }
 
@@ -33,16 +25,9 @@ $calibrationvalues2 = $day | foreach-object {
             default {$i++}
         }
         }
-    
-    if ($m.length -eq 1) {
-        $p2numb = $m * 2
-        $p2numb -as [int]
-        #write-host "$m [$p2numb]"
-        return
-    }
     $p2numb = $m[0] + $m[-1]
     $p2numb -as [int]
-    #write-host "$m [$p2numb]"
+
     }
 
 [pscustomobject]@{
