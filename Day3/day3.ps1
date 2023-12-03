@@ -47,9 +47,6 @@ $special = @{}
 
 $grid = [ordered]@{}
 
-$data.Length
-$data.count
-
 for ($y = 0; $y -lt $data.count; $y++) {
 
     for ($x = 0; $x -lt $data.Length; $x++) {
