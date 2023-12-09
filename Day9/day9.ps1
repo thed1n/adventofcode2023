@@ -8,6 +8,7 @@ Get-Content .\Day9\input.txt | ForEach-Object {
 [stack[int[]]]$stack = @()
 
 $sum = 0
+$sum2 = 0
 for ($arr = 0; $arr -lt $sequences.count; $arr++) {
 
     [Dictionary[int, list[int]]]$workingsequence = @{}
@@ -32,15 +33,21 @@ for ($arr = 0; $arr -lt $sequences.count; $arr++) {
         if ($workingsequence.containskey($key + 1)) {
             $scale = $workingsequence[($key + 1)][-1] + $workingsequence[$key][-1]
             $workingsequence[$key].add($scale)
+
+            $downwardscale = $workingsequence[$key][0] - $workingsequence[($key + 1)][0]
+            $workingsequence[$key].Insert(0,$downwardscale)
         }
         else {
             $workingsequence[$key].add(0)
+            $workingsequence[$key].Insert(0,0)
         }
     }
 
     $sum+=$workingsequence[0][-1]
+    $sum2+=$workingsequence[0][0]
 }
 
 [pscustomobject]@{
     Part1 = $sum
+    Part2 = $sum2
 }
