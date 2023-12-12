@@ -1,6 +1,13 @@
 using namespace System.Collections.Generic
 $galaxychart = Get-Content .\Day11\input.txt
+class matte {
+    static [int] manhattan ([string]$cord1,[string]$cord2) {
+        [int]$x1,[int]$y1 = $cord1 -split ','
+        [int]$x2,[int]$y2 = $cord2 -split ','
 
+        return [math]::abs($x1 - $x2)+[math]::abs($y1-$y2)
+    }
+}
 $galaxy = [list[list[string]]]::new()
 
 for ($y = 0; $y -lt $galaxychart.count; $y++) {
@@ -10,8 +17,8 @@ for ($y = 0; $y -lt $galaxychart.count; $y++) {
     }
 }
 
-$rowv = @{}
-$rowh = @{}
+$rowv = [ordered]@{}
+$rowh = [ordered]@{}
 for ($x = 0; $x -lt $galaxychart[0].Length; $x++) {
     $nogalaxy = $true
     for ($y = 0; $y -lt $galaxychart.count; $y++) {
@@ -21,7 +28,7 @@ for ($x = 0; $x -lt $galaxychart[0].Length; $x++) {
     }
 
     if ($nogalaxy -eq $true) {
-        $rowv["$x,$y"] = 'vertical'
+        $rowv["$x"] = 'vertical'
     }
 }
 for ($y = 0; $y -lt $galaxychart.count; $y++) {
@@ -34,23 +41,24 @@ for ($y = 0; $y -lt $galaxychart.count; $y++) {
     }
 
     if ($nogalaxy -eq $true) {
-        $rowh["$x,$y"] = 'horizontal'
+        $rowh["$y"] = 'horizontal'
     }
 }
-
+$shift = 0
 $rowh.keys | ForEach-Object {
-    [int]$x, [int]$y = $_ -split ','
+    [int]$y = $_ 
+    $y+=$shift
     $galaxy.Insert($y, [list[string]]::new())
 
-    for ($x = 0; $x -lt $galaxychart[0].Length; $x++) {
+    for ($x = 0; $x -lt $galaxy[0].count; $x++) {
         $galaxy[$y].Add('.')
     }
-    
+    $shift++
 }
 
 $shift = 0
 $rowv.keys | ForEach-Object {
-    [int]$x, [int]$y = $_ -split ','
+    [int]$x = $_
     $x+=$shift
     for ($y = 0; $y -lt $galaxy.count; $y++) {
         $galaxy[$y].Insert($x, '.')
@@ -58,14 +66,39 @@ $rowv.keys | ForEach-Object {
     $shift++
     
 }
-#render
+
+$galaxies = [ordered]@{}
+[list[string]]$cords = @()
+$gal = 1
 for ($y = 0; $y -lt $galaxy.count; $y++) {
     for ($x = 0; $x -lt $galaxy[0].count; $x++) {
-        Write-Host $($galaxy[$y][$x]) -NoNewline
+        if ($galaxy[$y][$x] -eq '#') {
+            $galaxies.add("$x,$y",$gal)
+            $cords.add("$x,$y")
+            $gal++
+        }
     }
-    Write-Host
 }
 
+#render
+# for ($y = 0; $y -lt $galaxy.count; $y++) {
+#     for ($x = 0; $x -lt $galaxy[0].count; $x++) {
+#         Write-Host $($galaxy[$y][$x]) -NoNewline
+#     }
+#     Write-Host
+# }
+
+$summa = 0
+for ($i = 0;$i -lt $cords.count-1;$i++) {
+    for ($j = $i+1;$j -lt $cords.count;$j++) {
+    $summa += [matte]::manhattan($cords[$i],$cords[($j)])
+    }
+}
+
+$summa
+
+<#
+BFS Way
 class galaxy {
     static [list[list[string]]]$galaxy
     static [queue[hashtable]]$queue = @{}
@@ -158,38 +191,12 @@ class galaxy {
 $pt1 = [galaxy]::new()
 [galaxy]::galaxy = $galaxy
 
-$galaxies = [ordered]@{}
-$gal = 1
-for ($y = 0; $y -lt $galaxy.count; $y++) {
-    for ($x = 0; $x -lt $galaxy[0].count; $x++) {
-        if ($galaxy[$y][$x] -eq '#') {
-            $galaxies.add("$x,$y",$gal)
-            $gal++
-        }
-    }
-}
+
 $pt1.galaxynumber = $galaxies
 
 $galaxies.keys | % {
     $pt1.findpaths($_,$galaxies[$_])
 }
 
-# $pt1.findpaths("4,0",1)
-# $pt1.tempresult.clear()
-# $pt1.findpaths("62,0",2)
 $pt1.sum
-#$pt1.tempresult.keys | % {if ($pt1.tempresult[$_].galaxy -eq $true) {[pscustomobject]$pt1.tempresult[$_]}} | ft -autosize
-
-# [list[string]]$paths = @()
-
-# $curr = '10,1'
-# $paths.add('10,1')
-
-# while ($pt1.tempresult[$curr].parent) {
-
-#     $paths.add($pt1.tempresult[$curr].parent)
-#     $curr = $pt1.tempresult[$curr].parent
-# }
-# [array]::Reverse($paths)
-# $paths -join ' -> '
-# $pt1.tempresult['10,1']
+#>
