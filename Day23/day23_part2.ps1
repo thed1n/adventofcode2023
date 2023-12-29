@@ -23,6 +23,8 @@ class trail {
     [object[]]$lookaround = @(@(-1, 0), @(1, 0), @(0, -1), @(0, 1))
     static [stack[hashtable]]$stack = @{}
     [stack[hashtable]]$backtrackstack = @{}
+    [int]$maxX
+    [int]$maxY
 
     trail ($gridmap, $end) {
         $this.map = $gridmap
@@ -132,7 +134,6 @@ class trail {
             try { $this.visited.add("$x,$y", $cost) } catch {}
             $isVisited.add("$x,$y", $cost)
             
-            $found = 0
             foreach ($dir in $this.lookaround) {
                 #x new , y new
                 $xn = $dir[0] + $x
@@ -141,52 +142,23 @@ class trail {
                 
                 if ("$xn,$yn" -eq $this.end) {
                     $this.results.add(($cost + 1))
+                    #$this.draw($isVisited)
                     return
                 }
                 
-                switch ($this.map["$xn,$yn"]) {
+                switch -Regex ($this.map["$xn,$yn"]) {
                     '#' { break }
-                    '.' {
+                    '<|>|\.|v' {
                         [trail]::stack.push(
                             @{
                                 node = "$xn,$yn"
                                 cost = $cost + 1
                             }
                         )
-                        $found++
                     }
-                    '>' {
-                        [trail]::stack.push(
-                            @{
-                                node = "$xn,$yn"
-                                cost = $cost + 1
-                            }
-                        )
-                        $found++
+                    default {
                     }
-                    '<' {
-                        [trail]::stack.push(
-                            @{
-                                node = "$xn,$yn"
-                                cost = $cost + 1
-                            }
-                        )
-                        $found++
-                    }
-                    'v' {
-                        [trail]::stack.push(
-                            @{
-                                node = "$xn,$yn"
-                                cost = $cost + 1
-                            }
-                        )
-                        $found++
-                    }
-                    default {}
                 }
-            }
-            if ($found -gt 1) {
-                $this.clusters.add($cost)
             }
 
         } While ([trail]::stack.count -gt 0)
@@ -221,12 +193,31 @@ class trail {
             Write-Host
         }
     }
+    draw([hashtable]$visited) {
+        for ($y = 0; $y -lt $this.maxy; $y++) {
+            for ($x = 0; $x -lt $this.maxx; $x++) {
+                if ($visited.ContainsKey("$x,$y")) {
+                    Write-Host "0" -NoNewline -ForegroundColor Green
+                }
+                elseif ($this.visited.ContainsKey("$x,$y")) {
+                    Write-Host "0" -NoNewline -ForegroundColor Red
+                }
+                else {
+                    Write-Host $this.map["$x,$y"] -NoNewline
+                }
+            }
+            Write-Host
+        }
+        Write-Host
+        Write-Host
+    }
 
 }
 
 
 $trail = [trail]::new($gridmap, $end)
-
+$trail.maxX = $map[0].Length
+$trail.maxY = $map.count
 $trail.traverse($start)
 #$trail.traverse()
 $trail.traverseall()
