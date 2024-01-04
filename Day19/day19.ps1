@@ -1,6 +1,7 @@
 using namespace System.Collections.Generic
 $data = Get-Content .\Day19\input.txt
 
+$workflows = @{}
 $functiondef = [list[string]]@()
 $inputdef = [list[string]]@()
 $data | ForEach-Object {
@@ -32,7 +33,7 @@ $functiondef | ForEach-Object {
             'if (${0}) {{return "{1}"}};' -f $commandline, $result
         }
     }
-    New-Item -Path function: -Name "get-$name" -Value $commandstring -Force
+    $workflows.add($name, [scriptblock]::Create($commandstring))
 }
 
 [int]$sum = 0
@@ -53,8 +54,7 @@ while ($true) {
         break
     }
     $result.add($start)
-    #write-host "$start -x $x -m $m -a $a -s $s"
-    $start = Invoke-Expression "get-$start -x $x -m $m -a $a -s $s"
+    $start = & $workflows[$start] -x $x -m $m -a $a -s $s
 }
 #$result -join ' -> '
 
