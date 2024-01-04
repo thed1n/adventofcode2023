@@ -1,4 +1,4 @@
-$cards = get-content .\day7\input.txt
+$cards = Get-Content .\day7\input.txt
 
 function get-rank {
     param(
@@ -28,28 +28,28 @@ QQQJA 483
 '@ -split '\r?\n' 
 #>
 
-$allcards = $cards  | % {
+$allcards = $cards  | ForEach-Object {
 
     $hand = @{}
     $jokerhand = @{}
     $card, $bet = $_ -split ' '
 
-    $card1 = $card -replace 'a','f' -replace 'k', 'e' -replace 'q', 'd' -replace 'j', 'c' -replace 't', 'b'
-    $card2 = $card -replace 'a','f' -replace 'k', 'e' -replace 'q', 'd' -replace 'j', '0' -replace 't', 'b'
+    $card1 = $card -replace 'a', 'f' -replace 'k', 'e' -replace 'q', 'd' -replace 'j', 'c' -replace 't', 'b'
+    $card2 = $card -replace 'a', 'f' -replace 'k', 'e' -replace 'q', 'd' -replace 'j', '0' -replace 't', 'b'
 
-    [char[]]$card1 | % {
+    [char[]]$card1 | ForEach-Object {
         $hand[$_]++
     }
 
-    [char[]]$card2 | % {
+    [char[]]$card2 | ForEach-Object {
         $jokerhand[$_]++
     }
 
     $highvalue = 0
     $key = ''
     if ($jokerhand.ContainsKey([char]'0')) {
-        $jokerhand.keys | % {
-            if ($_ -eq '0') {return}
+        $jokerhand.keys | ForEach-Object {
+            if ($_ -eq '0') { return }
             if ($highvalue -lt $jokerhand[$_]) {
                 $highvalue = $jokerhand[$_]
                 $key = $_
@@ -62,28 +62,28 @@ $allcards = $cards  | % {
     }
 
    
-    $cardhand = $hand.keys | % {
+    $cardhand = $hand.keys | ForEach-Object {
         $hand[$_]
     }
-    $johand = $jokerhand.keys | % {
+    $johand = $jokerhand.keys | ForEach-Object {
         $jokerhand[$_]
     }
 
-    $handvalue = ($cardhand | sort-object) -join '' | get-rank
-    $jokervalue = ($johand | sort-object) -join '' | get-rank
+    $handvalue = ($cardhand | Sort-Object) -join '' | get-rank
+    $jokervalue = ($johand | Sort-Object) -join '' | get-rank
 
 
     [pscustomobject]@{
-        Hand      = $card1
-        Jokerhand = $card2
-        Bet       = [int]$bet
+        Hand       = $card1
+        Jokerhand  = $card2
+        Bet        = [int]$bet
         Jokervalue = [int]$jokervalue
-        Handvalue = [int]$handvalue
+        Handvalue  = [int]$handvalue
     }
 }
 
-$sortedhands = $allcards | sort-object handvalue, hand
-$sortedjokerhands = $allcards | sort-object jokervalue, Jokerhand
+$sortedhands = $allcards | Sort-Object handvalue, hand
+$sortedjokerhands = $allcards | Sort-Object jokervalue, Jokerhand
 
 
 $sum = 0
@@ -92,13 +92,13 @@ for ($i = 0; $i -lt $sortedhands.count; $i++) {
     $sum += $sortedhands[$i].Bet * ($i + 1)
 }
 
-$sum2 =0
+$sum2 = 0
 for ($i = 0; $i -lt $sortedjokerhands.count; $i++) {
     #write-host "[$($sortedjokerhands[$i].jokerhand)] Rank: [$($i+1)] Value: [$($sortedjokerhands[$i].jokervalue)]"
     $sum2 += $sortedjokerhands[$i].Bet * ($i + 1)
 }
 
 [pscustomobject]@{
-Part1 = $sum
-Part2 = $sum2
+    Part1 = $sum
+    Part2 = $sum2
 }
